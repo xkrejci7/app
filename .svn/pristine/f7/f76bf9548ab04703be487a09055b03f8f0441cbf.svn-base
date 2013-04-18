@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  
+      xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd"  
+      xml:lang="en"  
+      lang="en"> 
+    <head> 
+        <wicket:head> 
+            <title>Wicket Example</title> 
+        </wicket:head> 
+    </head> 
+    <body> 
+        <wicket:extend>
+            <h1>XPath</h1>
+            
+            <span wicket:id="task">[[ ]]</span>
+            
+            <form wicket:id="form_xpath">
+                <input type="text" name="expression" value="" wicket:id="expression" />
+                <input type="submit" value="Vyhodnotit" />
+                
+                <div wicket:id="result"></div>
+                
+            </form>            
+            
+            <p>&nbsp;</p>
+
+        </wicket:extend>
+    </body> 
+</html>

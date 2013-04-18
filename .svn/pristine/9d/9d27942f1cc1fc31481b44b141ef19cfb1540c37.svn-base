@@ -1,0 +1,145 @@
+package cz.muni.fi.app;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+public class XPathProcessor {
+
+    private Document doc;
+    private DocumentBuilder docBuilder;
+   
+    /**
+     * Constructor. Loads and validates the XML file. 
+     * @param filename name of the file to load.
+     */
+    /*public  XPathProcessor(String filename)  throws ParserConfigurationException, IOException, SAXException {
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setValidating(true);
+        docBuilder = dbf.newDocumentBuilder();
+        doc = docBuilder.parse(filename);
+        
+    }*/
+
+    public XPathProcessor(String filename) throws ParserConfigurationException, SAXException, IOException {
+        
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setValidating(false); //don't check XML
+        docBuilder = dbf.newDocumentBuilder();
+        
+        //doc = docBuilder.parse(new InputSource(new StringReader(xml)));
+        doc = docBuilder.parse("D:\\dokumenty\\NetBeansProjects\\mavenproject1\\Application\\src\\main\\java\\fi\\muni\\cz\\application\\"+filename);
+
+    }
+    
+    
+    /**
+     * Displays the result in the form of a well-formed XML document.
+     * @param result - list of nodes corresponding to the XPath expression.
+     */
+    //public void show(NodeList result) throws ParserConfigurationException, TransformerException
+    private String show(NodeList result) throws ParserConfigurationException, TransformerException
+    {
+        Element root = doc.createElement("result");
+        
+        for(int i=0;i<result.getLength();i++)
+        {
+            //pokud jde o element, pridam element
+            if(result.item(i) instanceof Element) {
+                root.appendChild(result.item(i));
+            }
+            //pokud jde o attribut, pridam atribut
+            else if (result.item(i) instanceof Attr) {
+                Attr attr = (Attr)result.item(i);
+                root.setAttribute(attr.getName(), attr.getTextContent());
+            //jinak se pokusim pridat dokument
+            } else {
+                Document pomDoc = (Document)result.item(i);
+                root.appendChild(pomDoc.getDocumentElement());
+            }
+        }
+
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer trace = tf.newTransformer();
+
+        Writer outWriter = new StringWriter();  
+        
+        Source doms = new DOMSource(root);
+        //StreamResult sr = new StreamResult(System.out);
+        StreamResult sr = new StreamResult(outWriter);
+        
+        trace.setParameter(OutputKeys.INDENT, "yes");
+        
+        //trace.transform(doms, sr);
+        trace.transform(doms, sr);
+        
+        return sr.getWriter().toString();       
+
+    }
+    
+    private NodeList evaluate(String xPathExpr) throws XPathExpressionException
+    {
+        
+        XPathFactory xpf = XPathFactory.newInstance();
+        XPath xPath = xpf.newXPath();
+        
+        return (NodeList) xPath.evaluate(xPathExpr, doc.getDocumentElement(), XPathConstants.NODESET); //NODESET je sezam uzlu
+
+    }
+    
+    public String getResult(String xpath) throws XPathExpressionException, ParserConfigurationException, TransformerException {
+        
+        return show(evaluate(xpath));
+    }
+    
+    public String getOriginalXML() {
+        
+        try {
+            
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer trace = tf.newTransformer();
+            
+            Writer outWriter = new StringWriter(); 
+           
+            Source doms = new DOMSource(doc.getDocumentElement());
+
+            StreamResult sr = new StreamResult(outWriter);
+
+            trace.setParameter(OutputKeys.INDENT, "yes");
+            trace.transform(doms, sr);
+
+            return sr.getWriter().toString();
+            
+            
+        } catch (TransformerConfigurationException ex) {
+            Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException ex) {
+            Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        return "";
+
+        
+    }
+    
+}

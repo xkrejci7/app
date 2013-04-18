@@ -1,0 +1,131 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package cz.muni.fi.exercise;
+
+import cz.muni.fi.app.XMLPrinter;
+import cz.muni.fi.app.XPathProcessor;
+import cz.muni.fi.wicket.BasePage;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
+import org.xml.sax.SAXException;
+
+/**
+ * 
+ * @author xkrejci7
+ */
+public class XPath extends BasePage
+{
+    
+    private String task = "Napište xPath výraz:";
+    private String result;
+
+    public String getTask() {
+        return task;
+    }
+
+    /**
+     * Constructor
+     * 
+     */
+    public XPath()
+    {
+        super();
+        
+        task = "<p><b>Napište xPath výraz, který ze zadaného XML vybere knihu s názvem <i>War of the worlds</i>:</b></p><p>";
+        
+        try {
+            
+            XPathProcessor xPathProc = new XPathProcessor("books.xml");
+            XMLPrinter xmlPrinter = new XMLPrinter();
+            task = task + xmlPrinter.getEscapedXML(xPathProc.getOriginalXML());            
+            
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(XPath.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SAXException ex) {
+            Logger.getLogger(XPath.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(XPath.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        Label l = new Label("task", new PropertyModel(this, "task"));
+        l.setEscapeModelStrings(false);
+        
+        task += "</p>";
+        
+        add(l);
+        
+        XPathForm form = new XPathForm("form_xpath");
+       
+        add(form);
+    }
+
+    private static class XPathForm extends Form{
+        
+        private TextField expression;
+        private Label result;
+        
+        private String xPathResult="";
+
+        public XPathForm(String id) {
+            super(id);
+            
+            expression = new TextField("expression", new Model());
+            add(expression);
+            
+            PropertyModel pm = new PropertyModel(this, "result") {
+
+                @Override
+                public Object getObject() {
+                    
+                    XMLPrinter xmlPrinter = new XMLPrinter();
+                    
+                    return "<b>Result is:</b> " + xmlPrinter.getEscapedXML(xPathResult);
+                }
+                
+            };
+            
+            result = new Label("result", pm);
+            result.setEscapeModelStrings(false);
+            add(result);
+        }
+        
+        @Override
+        protected void onSubmit() {
+            
+            try {
+
+                XPathProcessor xPathProc = new XPathProcessor("books.xml");
+                
+                xPathResult = xPathProc.getResult((String)expression.getModelObject());
+
+            } catch (NullPointerException ex) {
+                xPathResult = "";
+            } catch (TransformerException ex) {
+                Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (XPathExpressionException ex) {
+                Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ParserConfigurationException ex) {
+                Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SAXException ex) {
+                Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }         
+
+
+    }
+
+}

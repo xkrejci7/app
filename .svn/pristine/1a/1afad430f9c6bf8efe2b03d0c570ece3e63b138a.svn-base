@@ -1,0 +1,27 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package cz.muni.fi.wicket;
+
+import cz.muni.fi.exercise.*;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.panel.Panel;
+
+/**
+ *
+ * @author Franta
+ */
+public class MenuPanel extends Panel {
+
+    public MenuPanel(String componentName) {
+        super(componentName);
+        
+        add(new BookmarkablePageLink("home", HomePage.class));
+        add(new BookmarkablePageLink("xpath", XPath.class));
+        add(new BookmarkablePageLink("dtd", DTD.class));
+        add(new BookmarkablePageLink("schema", Schema.class));
+        
+        
+    }    
+}

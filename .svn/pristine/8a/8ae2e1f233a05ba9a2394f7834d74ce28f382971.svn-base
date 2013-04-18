@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  
+      xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd"  
+      xml:lang="en"  
+      lang="en"> 
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=windows-1250"/>
+        <title>MenuPanel</title>
+        <link rel="stylesheet" type="text/css" href="style.css"/>
+    </head>
+    <body>
+        <!--        <span wicket:id='mainNavigation'/> -->
+        <wicket:panel>
+            <h1>Menu:</h1>
+            
+            <ul>
+                <li><a href="#" title="Úvodní stránka" wicket:id="home">Úvodní stránka</a></li>
+                <li><a href="#" title="XPath" wicket:id="xpath">XPath</a></li>
+                <li><a href="#" title="DTD" wicket:id="dtd">DTD</a></li>
+            </ul>
+            
+        </wicket:panel>        
+    </body>
+</html>

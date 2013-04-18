@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"  
+      xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-xhtml1.4-strict.dtd"  
+      xml:lang="en"  
+      lang="en"> 
+    <head> 
+        <title></title>
+    </head> 
+    <body> 
+        <wicket:extend>
+            <h1 wicket:id="message">This gets replaced</h1>
+            
+            <p>&nbsp;</p>
+            
+            <a href="#" wicket:id="link">This link</a> has been clicked
+            
+            <span wicket:id="label">[[ how many times ]]</span> times.
+            
+            <form wicket:id="form">
+                Input:<input type="text" wicket:id="input" name="input" value="" /><br />
+                Output from db: <input type="text" wicket:id="label2" name="label2" value="" disabled="true" />
+                <input type="submit" value="Odeslat" />
+            </form>
+            
+            <p wicket:id="div">&nbsp;</p>
+
+            <p>&nbsp;</p>
+            
+            <p>
+                <a href="#" wicket:id="refresh">Refreshed time</a>: <span wicket:id="refshedtime"></span>
+            </p>
+
+        </wicket:extend>
+    </body> 
+</html>

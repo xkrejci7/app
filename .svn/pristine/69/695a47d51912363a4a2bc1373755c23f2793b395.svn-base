@@ -1,0 +1,105 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package cz.muni.fi.exercise;
+
+import cz.muni.fi.app.SchemaProcessor;
+import cz.muni.fi.app.XMLPrinter;
+import cz.muni.fi.wicket.BasePage;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextArea;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
+
+/**
+ *
+ * @author Franta
+ */
+public final class Schema  extends BasePage implements java.io.Serializable {
+    
+    private String task;
+    private String result;
+    SchemaProcessor schemaProcessor;    
+
+    public Schema() {
+        super();
+        
+        schemaProcessor = new SchemaProcessor();        
+        XMLPrinter printer = new XMLPrinter();
+        
+        task = "<p><b>Pro níže uvedené XML dopište správné XSD schéma:</b></p><p>" + printer.getEscapedXML(schemaProcessor.getXML()) + "</p>";
+        
+        Label taskLabel = new Label("task",  new PropertyModel(this, "task"));
+        taskLabel.setEscapeModelStrings(false);
+        add(taskLabel);
+        
+        SchemaForm form = new SchemaForm("form");
+        
+        add(form);
+        
+    }
+
+    private class SchemaForm extends Form {
+        
+        private TextArea inputSchema;
+        private Label resutlLabel;
+        
+        String result = "";
+
+        public SchemaForm(String id) {
+            super(id);
+            
+            inputSchema = new TextArea("input", new Model());
+            inputSchema.setModelObject((String)"<?xml version=\"1.0\"?>\n" + 
+"<xsd:schema xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
+"elementFormDefault=\"qualified\">\n\n" + 
+"<xsd:element name=\"note\">\n" + 
+"  <xsd:complexType>\n" + 
+"    <xsd:sequence>\n" + 
+"      <xsd:element name=\"to\" type=\"xsd:string\"/>\n" + 
+"      <xsd:element name=\"from\" type=\"xsd:string\"/>\n" + 
+"      <xsd:element name=\"heading\" type=\"xsd:string\"/>\n" + 
+"    </xsd:sequence>\n" + 
+"  </xsd:complexType>\n" + 
+"</xsd:element>\n\n" + 
+"</xsd:schema>\n");
+            add(inputSchema);
+            
+            PropertyModel pm = new PropertyModel(this, "result") {
+
+                @Override
+                public Object getObject() {
+                    return result;
+                }
+                
+            };
+            
+            resutlLabel = new Label("resultLabel", pm);
+            resutlLabel.setEscapeModelStrings(false);
+            add(resutlLabel);
+        }
+        
+        @Override
+        protected void onSubmit() {
+
+            schemaProcessor.setXSD((String)inputSchema.getModelObject());
+
+            schemaProcessor.validate();
+            
+            result = schemaProcessor.getMessage();
+            
+            if (result == null || result.equals("")) {
+                result = "XSD schéma je správně.";
+            } else {
+                result += "neco spatne";
+            }
+            
+        }
+        
+        
+    }
+    
+
+}

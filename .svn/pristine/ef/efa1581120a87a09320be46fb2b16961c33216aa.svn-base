@@ -1,0 +1,43 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package cz.muni.fi.app;
+
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
+import org.xml.sax.SAXException;
+
+/**
+ *
+ * @author Franta
+ */
+public class Tester {
+    
+    public static void main(String [] args) throws XPathExpressionException, TransformerException {
+        try {
+            
+            XPathProcessor xPathProc = new XPathProcessor("books.xml");
+                    
+            System.out.println(xPathProc.getOriginalXML());
+            
+            //xPathProc.getResult("/bookshell/books[2]/book[1]")
+            
+            
+            
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(Tester.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SAXException ex) {
+            Logger.getLogger(Tester.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Tester.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    
+}

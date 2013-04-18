@@ -1,0 +1,102 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package cz.muni.fi.exercise;
+
+import cz.muni.fi.app.XMLPrinter;
+import cz.muni.fi.app.XPathProcessor;
+import cz.muni.fi.wicket.BasePage;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
+
+/**
+ * 
+ * @author xkrejci7
+ */
+public final class XPath extends BasePage implements java.io.Serializable {
+    
+    private String task;
+    private String result;
+    
+    XPathProcessor xPathProc;
+
+    /**
+     * Constructor
+     * 
+     */
+    public XPath()
+    {
+        super();
+        
+        xPathProc = new XPathProcessor();
+        XMLPrinter xmlPrinter = new XMLPrinter();
+        
+        task = "<p><b>Napište xPath výraz, který ze zadaného XML vybere knihu s názvem <i>War of the worlds</i>:</b></p><p>"
+               + xmlPrinter.getEscapedXML(xPathProc.getOriginalXML()) + "</p>";
+
+        Label taskLabel = new Label("task", new PropertyModel(this, "task"));
+        taskLabel.setEscapeModelStrings(false);
+        add(taskLabel);
+
+        XPathForm form = new XPathForm("form");
+
+        add(form);            
+    }
+
+    private class XPathForm extends Form {
+        
+        private TextField expression;
+        private Label resultLabel;        
+        private String result="";
+
+        public XPathForm(String id) {
+            super(id);
+            
+            expression = new TextField("expression", new Model());
+            add(expression);
+            
+            PropertyModel pm = new PropertyModel(this, "result") {
+
+                @Override
+                public Object getObject() {
+                    return result;
+                }
+                
+            };
+            
+            resultLabel = new Label("resultLabel", pm);
+            resultLabel.setEscapeModelStrings(false);
+            add(resultLabel);
+        }
+        
+        @Override
+        protected void onSubmit() {
+            
+            try {
+
+                result = xPathProc.getResult((String)expression.getModelObject());
+                
+                XMLPrinter printer = new XMLPrinter();
+                
+                if (result.replaceAll("\\s", "").equals(xPathProc.getExpectedResult().replaceAll("\\s", ""))) {
+                    result = printer.getEscapedXML(result) + "<p><b>Váš výsledek je správně</b></p>";
+                } else {
+                    result = printer.getEscapedXML(result) + "<p><b>Váš výsledek neodpovídá očekávanému výsledku.</b></p>";
+                }
+                    
+            } catch (Exception ex) {
+                Logger.getLogger(XPath.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        }         
+
+
+    }
+
+}

@@ -1,0 +1,203 @@
+package cz.muni.fi.app;
+
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import org.apache.xerces.parsers.SAXParser;
+
+import org.w3c.dom.*;
+import org.xml.sax.InputSource;
+
+public class XPathProcessor implements java.io.Serializable {
+
+    private Document doc;
+    private DocumentBuilder docBuilder;
+
+    /**
+     * Constructor. Loads and validates the XML file.
+     *
+     * @param filename name of the file to load.
+     */
+    /*public  XPathProcessor(String filename)  throws ParserConfigurationException, IOException, SAXException {
+
+     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+     dbf.setValidating(true);
+     docBuilder = dbf.newDocumentBuilder();
+     doc = docBuilder.parse(filename);
+        
+     }*/
+    public XPathProcessor() {
+
+        try {
+
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setValidating(false); //don't check XML
+            docBuilder = dbf.newDocumentBuilder();
+
+            //doc = docBuilder.parse("filename");
+            String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                    + "<bookshell>\n"
+                    + "    <book>\n"
+                    + "        <author>O. G. Wells</author>\n"
+                    + "        <title>War of the worlds</title>\n"
+                    + "        <pages>876</pages>\n"
+                    + "    </book>\n"
+                    + "    <book>\n"
+                    + "        <author>O. Sekora</author>\n"
+                    + "        <title>Ferda Mravenec</title>\n"
+                    + "        <pages>178</pages>\n"
+                    + "    </book>\n"
+                    + "</bookshell>";
+
+            doc = docBuilder.parse(new InputSource(new StringReader(xml)));
+
+        } catch (Exception ex) {
+            Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    /**
+     * Displays the result in the form of a well-formed XML document.
+     *
+     * @param result - list of nodes corresponding to the XPath expression.
+     */
+    //public void show(NodeList result) throws ParserConfigurationException, TransformerException
+    private String show(NodeList result) {
+        Element root = doc.createElement("doc");
+
+        for (int i = 0; i < result.getLength(); i++) {
+            //pokud jde o element, pridam element
+            if (result.item(i) instanceof Element) {
+                root.appendChild(result.item(i));
+            } //pokud jde o attribut, pridam atribut
+            else if (result.item(i) instanceof Attr) {
+                Attr attr = (Attr) result.item(i);
+                root.setAttribute(attr.getName(), attr.getTextContent());
+                //jinak se pokusim pridat dokument
+            } else {
+                Document pomDoc = (Document) result.item(i);
+                root.appendChild(pomDoc.getDocumentElement());
+            }
+        }
+
+
+        try {
+
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer trace = tf.newTransformer();
+
+            Writer outWriter = new StringWriter();
+
+            Source doms = new DOMSource(root);
+            //StreamResult sr = new StreamResult(System.out);
+            StreamResult sr = new StreamResult(outWriter);
+
+            trace.setParameter(OutputKeys.INDENT, "yes");
+
+            //trace.transform(doms, sr);
+            trace.transform(doms, sr);
+
+            return sr.getWriter().toString();
+
+        } catch (Exception ex) {
+            Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return "";
+
+    }
+
+    public String getExpectedResult() {
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?><doc><book>\n"
+                + "        <author>O. G. Wells</author>\n"
+                + "        <title>War of the worlds</title>\n"
+                + "        <pages>876</pages>\n"
+                + "    </book></doc>"
+                + "";
+    }
+
+    private NodeList evaluate(String xPathExpr) {
+
+        XPathFactory xpf = XPathFactory.newInstance();
+        XPath xPath = xpf.newXPath();
+
+        try {
+
+            return (NodeList) xPath.evaluate(xPathExpr, doc.getDocumentElement(), XPathConstants.NODESET); //NODESET je sezam uzlu
+
+        } catch (XPathExpressionException ex) {
+            Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
+
+    }
+
+    public String getResult(String xpath) {
+
+        try {
+
+            if (xpath == null) {
+                xpath = "";
+            }
+
+            return show(evaluate(xpath));
+        } catch (Exception ex) {
+            Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return "";
+
+    }
+
+    public String getOriginalXML() {
+
+        try {
+
+            TransformerFactory tf = TransformerFactory.newInstance();
+            Transformer trace = tf.newTransformer();
+
+            Writer outWriter = new StringWriter();
+
+            Source doms = new DOMSource(doc.getDocumentElement());
+
+            StreamResult sr = new StreamResult(outWriter);
+
+            trace.setParameter(OutputKeys.INDENT, "yes");
+            trace.transform(doms, sr);
+
+            return sr.getWriter().toString();
+
+
+        } catch (TransformerConfigurationException ex) {
+            Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException ex) {
+            Logger.getLogger(XPathProcessor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return "";
+
+
+    }
+
+    public String getSolution() {
+        return "/bookshell/book[1]";
+    }
+}
